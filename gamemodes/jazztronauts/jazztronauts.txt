@@ -5,7 +5,7 @@
 	"menusystem" 	"1"
 	"maps" 			"^jazz_"
 	"category"		"pve"
-	"workshopid"	"1452613192"
+	"workshopid"	"3397335954"
 
 	"settings"
 	{

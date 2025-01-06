@@ -1,0 +1,6 @@
+begin:
+    *BLOCKSTART*
+        *emitsound npc/combine_soldier/vo/on2.wav*
+        *setspeaker cat_bar*
+    *BLOCKEND*
+    Yes?

@@ -112,7 +112,7 @@ local snatch_multi = jstore.Register("snatch_multi", 50000, {
 	type = "upgrade"
 })
 
-local snatch_masssnatch = jstore.Register("snatch_masssnatch", 500000, {
+local snatch_masssnatch = jstore.Register("snatch_masssnatch", 50000, {
 	name = jazzloc.Localize("jazz.weapon.snatcher.upgrade.masssnatch"),
 	cat = jazzloc.Localize("jazz.weapon.snatcher"),
 	desc = jazzloc.Localize("jazz.weapon.snatcher.upgrade.masssnatch.desc"),
@@ -121,16 +121,16 @@ local snatch_masssnatch = jstore.Register("snatch_masssnatch", 500000, {
 
 local snatch_masscap = jstore.RegisterSeries("snatch_masscap", 15000, 4, {
 	name = jazzloc.Localize("jazz.weapon.snatcher.upgrade.masscap"),
-	desc = function(num) local num = num or 0 return jazzloc.Localize("jazz.weapon.snatcher.upgrade.masscap.desc",num*10) end,
+	desc = function(num) local num = num or 0 return jazzloc.Localize("jazz.weapon.snatcher.upgrade.masscap.desc",(num+1)*10) end,
 	requires = snatch_masssnatch,
 	type = "upgrade",
 	cat = jazzloc.Localize("jazz.weapon.snatcher"),
 	priceMultiplier = 2,
 })
 
-local snatch_rechargetime = jstore.RegisterSeries("snatch_rechargetime", 10000, 5, {
-	name = jazzloc.Localize("jazz.weapon.snatcher.upgrade.rechargetime"),
-	desc = function(num) local num = num or 0 return jazzloc.Localize("jazz.weapon.snatcher.upgrade.rechargetime.desc",num*10) end,
+local snatch_massrechargetime = jstore.RegisterSeries("snatch_massrechargetime", 10000, 5, {
+	name = jazzloc.Localize("jazz.weapon.snatcher.upgrade.massrechargetime"),
+	desc = function(num) local num = num or 0 return jazzloc.Localize("jazz.weapon.snatcher.upgrade.massrechargetime.desc",num*10) end,
 	requires = snatch_masssnatch,
 	type = "upgrade",
 	cat = jazzloc.Localize("jazz.weapon.snatcher"),
@@ -225,8 +225,8 @@ function SWEP:SetUpgrades(overpowered)
 
 	-- Allow Multi-Stealing
 	self.CanMassSteal = unlocks.IsUnlocked("store", owner, snatch_masssnatch) or overpowered
-	self.MassStealCap= overpowered and 50 or (jstore.GetSeries(owner, snatch_masscap)*10+10)
-	self.RechargeDivider= overpowered and 5 or (jstore.GetSeries(owner, snatch_masscap))
+	self.MassStealCap = overpowered and 50 or (jstore.GetSeries(owner, snatch_masscap)*10+10)
+	self.MassRecharge = overpowered and 5 or (jstore.GetSeries(owner, snatch_massrechargetime))
 end
 
 function SWEP:MakeOverpowered()
@@ -236,7 +236,7 @@ end
 
 function SWEP:SetupDataTables()
 	self.BaseClass.SetupDataTables( self )
-	self:NetworkVar("Entity", 0, "CurSnatchMarker")
+	self:NetworkVar("Entity", "CurSnatchMarker")
 end
 
 function SWEP:Deploy()
@@ -929,39 +929,50 @@ end
 local ReloadTime=0
 local RechargeDivider=0
 
+if SERVER then
+	util.AddNetworkString("buckrechargetime")
+	net.Receive("buckrechargetime",function()
+		RechargeDivider = net.ReadFloat()
+		print(RechargeDivider)
+	end)
+end
+
 function SWEP:Reload()
-	-- sorry if the code is bad
-	if CurTime()-ReloadTime<=RechargeDivider or !self:CanReload() then return end --todo: cooldown indicator maybe?
-	print("A")
+
+	if not (self:CanReload() and CurTime()-ReloadTime-0.001 > RechargeDivider) then return end --todo: cooldown indicator maybe?
 	self.BaseClass.Reload( self )
-	RechargeDivider=0
+	ReloadTime=CurTime()
+
+	if SERVER then return end
+
+	RechargeDivider = 0
 
 	local Accepting=self.ConeAccept
 	if Accepting==nil or #Accepting==0 then 
-		RechargeDivider=2.5
+		RechargeDivider = 3-self.MassRecharge/2
 		self:EmitSound( self.MissSounds[math.random(1,#self.MissSounds)], 50, math.random( 50, 50 ), 1, CHAN_AUTO )
 		self.BadShootFade=1.0
 	else
-	for i=0,self.MassStealCap-1 do
-		if i>#Accepting then break end
-		local v=Accepting[#Accepting-i]
-		
-		if self:AcceptEntity(v) then
-			RechargeDivider=RechargeDivider+1-(.1*self.RechargeDivider)
+		for i=0,self.MassStealCap-1 do
+			if i>#Accepting then break end
+			local v=Accepting[#Accepting-i]
 			
+			if IsValid(v) and self:AcceptEntity(v) then
+				RechargeDivider = RechargeDivider+(10-self.MassRecharge)/self.MassStealCap
 
-			net.Start( "remove_client_send_trace" )
-			net.WriteBit(1)
-			net.WriteEntity( self )
-			net.WriteEntity( v )
-			net.SendToServer()
+				net.Start( "remove_client_send_trace" )
+				net.WriteBit(1)
+				net.WriteEntity( self )
+				net.WriteEntity( v )
+				net.SendToServer()
+			end
 		end
+		self:EmitSound( self.BigSnatchSounds[math.random(1,#self.BigSnatchSounds)], 50, math.random( 100, 100 ), 1, CHAN_AUTO )
 	end
+	net.Start("buckrechargetime")
+		net.WriteFloat(RechargeDivider)
+	net.SendToServer()
 	print(RechargeDivider)
-	self:EmitSound( self.BigSnatchSounds[math.random(1,#self.BigSnatchSounds)], 50, math.random( 100, 100 ), 1, CHAN_AUTO )
-end
-
-	ReloadTime=CurTime()
 
 	self:ShootEffects()
 end

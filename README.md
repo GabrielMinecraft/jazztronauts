@@ -25,6 +25,8 @@ Contributions are always welcome, and can be done through the normal github pull
 
 ## Fork?
 
-This fork is The Fork of [another Fork](https://github.com/SageJFox/jazztronauts/tree/sceneroots/). You can find the workshop addon [here](https://steamcommunity.com/sharedfiles/filedetails/?id=3397335954).
+Jazztronauts 2025 is a personal fork of [another Fork](https://github.com/SageJFox/jazztronauts/tree/sceneroots/) of [Jazztronauts](https://github.com/Foohy/jazztronauts). You can find the workshop addon [here](https://steamcommunity.com/sharedfiles/filedetails/?id=3397335954).
+
+
 
 ### [INSTALLATION AND PLAY FAQ](https://github.com/Foohy/jazztronauts/wiki/FAQ)

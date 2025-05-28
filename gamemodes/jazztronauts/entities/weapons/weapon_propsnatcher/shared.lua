@@ -39,6 +39,7 @@ SWEP.CloseRange				= ShortRangeDefault
 -- Tier 1 settings
 local AimConeDefault		= 3
 SWEP.AutoAimCone			= AimConeDefault
+local multistealDefault		= 1
 
 -- Tier 2 settings
 SWEP.MaxFireDelayAdd		= 1.2 -- Max delay added when snatcher just started
@@ -79,6 +80,13 @@ local snatch_cone = jstore.RegisterSeries("snatch_cone", 20000, 10, {
 local snatch_range = jstore.RegisterSeries("snatch_range", 10000, 10, {
 	name = jazzloc.Localize("jazz.weapon.snatcher.upgrade.range"),
 	desc = jazzloc.Localize("jazz.weapon.snatcher.upgrade.range.desc"),
+	type = "upgrade",
+	cat = jazzloc.Localize("jazz.weapon.snatcher"),
+	priceMultiplier = 1.5,
+})
+local snatch_multisteal = jstore.RegisterSeries("snatch_multisteal", 30000, 10, {
+	name = jazzloc.Localize("jazz.weapon.snatcher.upgrade.multisteal"),
+	desc = jazzloc.Localize("jazz.weapon.snatcher.upgrade.multisteal.desc"),
 	type = "upgrade",
 	cat = jazzloc.Localize("jazz.weapon.snatcher"),
 	priceMultiplier = 1.5,
@@ -193,6 +201,10 @@ function SWEP:SetUpgrades(overpowered)
 	self.MaxRange	= LongRangeDefault + rangeLevel * 150
 	self.CloseRange = ShortRangeDefault + rangeLevel * 25
 
+	-- Steal Amount
+	local multistealLevel=overpowered and 10 or multistealDefault + jstore.GetSeries(owner,snatch_multisteal)
+	self.multistealLevel=multistealLevel
+
 	-- Tier II - Automatic fire upgrade
 	if unlocks.IsUnlocked("store", owner, snatch2) or overpowered then
 		self.MaxFireDelayAdd = t2MaxFireDelayAdd
@@ -221,8 +233,8 @@ function SWEP:SetUpgrades(overpowered)
 
 	-- Allow Multi-Stealing
 	self.CanMassSteal = unlocks.IsUnlocked("store", owner, snatch_masssnatch) or overpowered
-	self.MassStealCap= overpowered and 50 or (jstore.GetSeries(owner, snatch_masscap)*10+10)
-	self.MassRecharge= overpowered and 5 or (jstore.GetSeries(owner, snatch_massrechargetime))
+	self.MassStealCap = overpowered and 50 or (jstore.GetSeries(owner, snatch_masscap)*10+10)
+	self.MassRecharge = overpowered and 5 or (jstore.GetSeries(owner, snatch_massrechargetime))
 end
 
 function SWEP:MakeOverpowered()
@@ -521,11 +533,20 @@ function SWEP:TraceToRemove(stealWorld)
 		-- Tell the server which entity we'd like to pick
 		if self:AcceptEntity( self.ConeEnt ) then
 			self.ConeEnt.JazzSnatchWait = CurTime() + 2.0
+			local tosteal={self.ConeEnt}
+			if self.multistealLevel > 1 then
+				for i = 1,self.multistealLevel do
+					pcall(function() table.insert(tosteal,self.ConeAccept[i]) end)
+				end
+			end
+
+			for _,v in pairs(tosteal) do
 			net.Start( "remove_client_send_trace" )
 			net.WriteBit(1)
 			net.WriteEntity( self )
-			net.WriteEntity( self.ConeEnt )
+			net.WriteEntity( v )
 			net.SendToServer()
+			end
 
 			self:EmitSound( self.SnatchSounds[math.random(1,#self.SnatchSounds)], 50, math.random( 100, 100 ), 1, CHAN_AUTO )
 			

@@ -1,4 +1,4 @@
--- Board that displays currently selected maps
+-- The Hole the bus makes when it blows through the wall.
 AddCSLuaFile()
 AddCSLuaFile("cl_voidrender.lua")
 if CLIENT then include("cl_voidrender.lua") end
@@ -18,11 +18,20 @@ end
 ENT.VoidModels = {
 	"models/jazztronauts/zak/Boneless_Kleiner.mdl",
 	"models/Gibs/HGIBS.mdl",
+	"models/Gibs/HGIBS_spine.mdl",
+	"models/Gibs/HGIBS_scapula.mdl",
+	"models/Gibs/HGIBS_rib.mdl",
 	"models/props_junk/ravenholmsign.mdl",
 	"models/props_interiors/BathTub01a.mdl",
 	"models/props_junk/wood_crate001a.mdl",
 	"models/props_lab/cactus.mdl",
-	"models/props_junk/trashdumpster01a.mdl"
+	"models/props_junk/trashdumpster01a.mdl",
+	"models/props_junk/wood_spool01.mdl",
+	"models/extras/info_speech.mdl",
+	"models/editor/playerstart.mdl",
+	"models/props_c17/doll01.mdl",
+	"models/props_junk/watermelon01.mdl",
+	"models/props_junk/trafficcone001a.mdl"
 }
 
 ENT.VoidSpeedTunnelModel = "models/sunabouzu/bustunnel.mdl"

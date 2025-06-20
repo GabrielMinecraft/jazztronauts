@@ -150,6 +150,33 @@ local snatch_level = jstore.RegisterSeries("snatch_level", 100000, 2, {
 
 CreateConVar("jazz_debug_snatch_allups", "0", { FCVAR_REPLICATED, FCVAR_NOTIFY, FCVAR_CHEAT }, jazzloc.Localize("Temporarily enable all upgrades for snatcher"))
 
+--reapply upgrades (or lackthereof) on allups change
+if SERVER then
+	util.AddNetworkString("JazzClientSnatcherUpdate")
+
+	cvars.AddChangeCallback( "jazz_debug_snatch_allups", function(convar, old, new)
+		for _, snatcher in ipairs(ents.FindByClass("weapon_propsnatcher")) do
+			if IsValid(snatcher) then
+				snatcher:SetUpgrades()
+				local owner = snatcher:GetOwner()
+				if IsValid(owner) then
+					net.Start("JazzClientSnatcherUpdate")
+					net.Send(owner)
+				end
+			end
+		end
+	end )
+
+else
+	net.Receive("JazzClientSnatcherUpdate", function(len,ply)
+		for _, snatcher in ipairs(ents.FindByClass("weapon_propsnatcher")) do
+			if IsValid(snatcher) then
+				snatcher:SetUpgrades()
+			end
+		end
+	end)
+end
+
 function SWEP:Initialize()
 	self.BaseClass.Initialize( self )
 
@@ -186,10 +213,10 @@ function SWEP:SetUpgrades(overpowered)
 	end
 
 	-- Tier I - Aim in cone upgrade
-	self.AutoAimCone = AimConeDefault + jstore.GetSeries(owner, snatch_cone) * 3.3
+	self.AutoAimCone = AimConeDefault + (overpowered and jstore.GetSeriesMax(snatch_cone) or jstore.GetSeries(owner, snatch_cone)) * 3.3
 
 	-- Steal range
-	local rangeLevel = overpowered and 10 or jstore.GetSeries(owner, snatch_range)
+	local rangeLevel = overpowered and jstore.GetSeriesMax(snatch_range) or jstore.GetSeries(owner, snatch_range)
 	self.MaxRange	= LongRangeDefault + rangeLevel * 150
 	self.CloseRange = ShortRangeDefault + rangeLevel * 25
 
@@ -263,10 +290,13 @@ function SWEP:ViewModelDrawn(viewmodel) end
 function SWEP:Think() end
 function SWEP:OnRemove() end
 
+local maxlevel = mapgen.GetMaxSnatchLevel() - 1
+
 function SWEP:AcceptEntity( ent ) --TODO: network so we can use snatchable on client
 	local level = 0
 	local owner = self:GetOwner()
 	if IsValid(owner) then level = jstore.GetSeries(owner, snatch_level) end
+	if self.Overpowered or cvars.Bool("jazz_debug_snatch_allups", false) then level = maxlevel end
 	
 	return mapgen.CanSnatch(ent, level + 1) and (not ent.JazzSnatchWait or CurTime() > ent.JazzSnatchWait)
 end

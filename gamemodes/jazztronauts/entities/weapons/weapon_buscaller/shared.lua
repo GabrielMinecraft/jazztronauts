@@ -39,6 +39,7 @@ SWEP.Upgrade				= nil --I feel like there has to be a better way than this mess,
 
 if SERVER then
 	util.AddNetworkString("JazzBusSummonerKeyChain")
+	util.AddNetworkString("JazzVoteShow")
 end
 
 function SWEP:Initialize()
@@ -203,8 +204,15 @@ function SWEP:CreateOrUpdateBusMarker()
 			if not voted then
 				voted = true
 				mapcontrol.voteToLeave(true)
+				net.Start("JazzVoteShow")
+					net.WriteBool(true)
+				net.Broadcast()
 			end
 			return
+		else
+			net.Start("JazzVoteShow")
+				net.WriteBool(false)
+			net.Broadcast()
 		end
 	end
 
@@ -225,6 +233,20 @@ function SWEP:PrimaryAttack()
 		if SERVER then
 
 			self:CreateOrUpdateBusMarker()
+		else --CLIENT
+			timer.Simple(0,function()
+				if IsValid(self) then
+					if not IsValid(self:GetBusMarker()) then
+						if not voted then
+							voted = true
+							mapcontrol.voteToLeave(true)
+						end
+					else
+						voted = nil
+						mapcontrol.voteToLeave(false)
+					end
+				end
+			end)
 		end
 	end
 
@@ -344,7 +366,27 @@ end )
 
 if CLIENT then
 
+	local voteshow = false
 	local funnydraw = GetConVar("r_drawtranslucentworld")
+
+	net.Receive("JazzVoteShow", function()
+		if net.ReadBool() then
+			ErrorNoHalt(jazzloc.Localize( "jazz.weapon.buscaller.votes.hint", jazzloc.Localize( input.LookupBinding("+attack") ) )) --show a hint for everyone
+			hook.Add( "HUDPaint", "JazzVotePanel", function()
+				surface.SetFont( "Default" )
+				surface.SetTextPos( 52, 128 ) 
+				local count, total = mapcontrol.GetVotesToLeave()
+				local label = jazzloc.Localize( "jazz.weapon.buscaller.votes", count, total )
+				local w, h = surface.GetTextSize( label )
+				surface.SetDrawColor( 0, 0, 0, 128 )
+				surface.DrawRect( 48, 126, w + 8, h + 4 )
+				surface.SetTextColor( 216, 64, 255, 255 )
+				surface.DrawText( label )
+			end )
+		else
+			hook.Remove( "HUDPaint", "JazzVotePanel" )
+		end
+	end)
 	
 	function SWEP:renderPlayerBeam()
 		if not IsValid(self) then return false end

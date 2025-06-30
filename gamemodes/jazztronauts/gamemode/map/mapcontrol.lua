@@ -33,9 +33,10 @@ cvars.AddChangeCallback(includeLocalAddons:GetName(), UpdateMapsConvarChanged, "
 cvars.AddChangeCallback(includeLocalMaps:GetName(), UpdateMapsConvarChanged, "jazz_mapcontrol_cback")
 
 votesToLeave = 0 --if we're too close to the edict limit to summon the bus, count bus summoner useage as a vote to leave
+majority = 1 --votes needed to leave
 
 function voteToLeave(vote)
-	if ents.GetEdictCount() < 8064 then votesToLeave = 0 return end --we've dipped back below a dangerous edict level, no need for voting
+	if SERVER and ents.GetEdictCount() < 8064 then votesToLeave = 0 return end --we've dipped back below a dangerous edict level, no need for voting
 	local summoners = 0 --total number of bus summoners with player owners (not all players might have/be able to get summoners if we're near edict limit)
 	for _, ent in ents.Iterator() do
 		if IsValid(ent) then
@@ -45,12 +46,16 @@ function voteToLeave(vote)
 			end
 		end
 	end
-	local majority = math.ceil(summoners / 2)
+	majority = math.ceil(summoners / 2)
 	votesToLeave = vote and votesToLeave + 1 or math.max(0,votesToLeave - 1)
-	if votesToLeave >= majority and not IsLaunching() then --get us out of here
-		--TODO: make this a little less abrupt. Add HUD stuff explaining what's going on/showing a current vote to leave
+	if SERVER and votesToLeave >= majority and not IsLaunching() then --get us out of here
+		--TODO: make this a little less abrupt.
 		Launch(GetHubMap())
 	end
+end
+
+function GetVotesToLeave()
+	return votesToLeave, majority
 end
 
 local server_ugc = false

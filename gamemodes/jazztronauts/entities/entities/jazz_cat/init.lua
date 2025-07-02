@@ -67,7 +67,11 @@ function ENT:Initialize()
 		GetConVar("jazz_hub_outro2"):GetString() ..":"..
 		GetConVar("jazz_trolley"):GetString() ) )
 	end
-	self:SetupChatTables()
+	
+	timer.Simple(1, function()
+		if not IsValid(self) then return end
+		self:SetupChatTables()
+	end)
 
 end
 
@@ -92,6 +96,7 @@ function ENT:KeyValue( key, value )
 	if key == "multiplier" then
 		self.Multiplier = tonumber(value) or 1
 	end
+
 end
 
 

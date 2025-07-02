@@ -1,4 +1,4 @@
-local chatmenu = include("sh_chatmenu.lua")
+ENT.chatmenu = include("sh_chatmenu.lua")
 
 ENT.Type = "anim"
 ENT.Base = "base_anim"
@@ -21,35 +21,46 @@ function ENT:SetupDataTables()
 	self:NetworkVar("String", "HubInfo")
 end
 
-function ENT:SetupChatTables()
-	self.ChatChoices = {}
-	if self:GetNPCID() == missions.NPC_CAT_BAR then
-		self.ChatChoices.WelcomeText = "#jazz.store.welcome"
-		chatmenu.AddChoice(self.ChatChoices, "#jazz.store.upgrade", function(self, ply) ClientRun(ply, "jstore.OpenUpgradeStore()") end)
-		chatmenu.AddChoice(self.ChatChoices, "#jazz.store.store", function(self, ply) ClientRun(ply, "jstore.OpenStore()") end)
-		chatmenu.AddChoice(self.ChatChoices, "#jazz.store.chat", function(self, ply) self:StartChat(ply) end)
-		--add option for switching this map to be the hub
-		timer.Simple(1, function()
-			local selector = ents.FindByClass("jazz_hub_selector")[1]
-			if not IsValid(self) or not IsValid(selector) or not hubtrolleybugme:GetBool() then return end
-			
-			if self:GetHubInfo() ~= selector:GetHubInfo() then
-				chatmenu.AddChoice(self.ChatChoices, "#jazz.store.hub", function(self, ply)
-					local script = "hub.begin"
-					if SERVER then
-						dialog.Dispatch(script, ply, self)
-					else
-						net.Start("JazzPlayScript")
-							net.WriteEntity(self)
-							net.WriteString(script)
-						net.SendToServer()
-					end
-				end)
+function ENT:addHubChat( label )
+	local selector = ents.FindByClass("jazz_hub_selector")[1]
+	if not IsValid(self) or not IsValid(selector) or not hubtrolleybugme:GetBool() then return end
+	
+	if self:GetHubInfo() ~= selector:GetHubInfo() then
+		self.chatmenu.AddChoice(self.ChatChoices, label, function(self, ply)
+			local script = "hub.begin"
+			if SERVER then
+				dialog.Dispatch(script, ply, self)
+			else
+				net.Start("JazzPlayScript")
+					net.WriteEntity(self)
+					net.WriteString(script)
+				net.SendToServer()
 			end
 		end)
-	else
-		--self.ChatChoices.WelcomeText = ""
-		--chatmenu.AddChoice(self.ChatChoices, "Let's chat!", function(self, ply) self:StartChat(ply) end)
+	end
+end
+
+function ENT:SetupChatTables()
+	self.ChatChoices = self.ChatChoices or {}
+	local menuent = ents.FindByClass("jazz_cat_menu")[1]
+	if not IsValid(menuent) then --default menus
+		if self:GetNPCID() == missions.NPC_CAT_BAR then
+			self.ChatChoices.WelcomeText = "#jazz.store.welcome"
+			self.chatmenu.AddChoice(self.ChatChoices, "#jazz.store.upgrade", function(self, ply) ClientRun(ply, "jstore.OpenUpgradeStore()") end)
+			self.chatmenu.AddChoice(self.ChatChoices, "#jazz.store.store", function(self, ply) ClientRun(ply, "jstore.OpenStore()") end)
+			self.chatmenu.AddChoice(self.ChatChoices, "#jazz.store.chat", function(self, ply) self:StartChat(ply) end)
+			--add option for switching this map to be the hub
+			timer.Simple(1, function() self:addHubChat("#jazz.store.hub") end)
+		else
+			--self.ChatChoices.WelcomeText = ""
+			--self.chatmenu.AddChoice(self.ChatChoices, "Let's chat!", function(self, ply) self:StartChat(ply) end)
+		end
+	end
+	
+	-- Allow mouse clicks on the chat menu (and make it so clicking doesn't shoot their weapon)
+	if CLIENT and self.ChatChoices and #self.ChatChoices > 0 then
+		hook.Add("KeyPress", self, function(self, ply, key) return self:OnMouseClicked(ply, key) end )
+		hook.Add("KeyRelease", self, function(self, ply, key) return self:OnMouseReleased(ply, key) end)
 	end
 end
 

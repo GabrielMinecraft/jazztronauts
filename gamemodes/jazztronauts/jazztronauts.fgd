@@ -175,6 +175,54 @@
 	]
 ]
 
+@PointClass base(Targetname) iconsprite("editor/jazz_cat_menu.vmt") = jazz_cat_menu : "Jazz Cat Menu"
+[
+	npcid(choices) : "Cat Character" : "1" =
+    [
+        1 : "Bartender" 
+        2 : "Singer" 
+        3 : "Pianist" 
+		4 : "Cellist"
+    ]
+	WelcomeText(string) : "Welcome Text" : "#jazz.store.welcome" : "Top label for text box. Can be a localization token."
+	ChatChoiceLabel1(string) : "First Chat Choice Label" : "#jazz.store.upgrade" : "Label for first chat choice. Can be a localization token."
+	ChatChoice1(choices) : "First Chat Choice Action" : "UPGRADES" : "Defines the function of the first chat choice. Can be a (short!) bit of Clientside Lua" = 
+	[
+		"UPGRADES" : "Upgrades Menu"
+		"STORE" : "Shop Menu"
+		"CHAT" : "Let's Chat!"
+		"HUB" : "(If needed) Hub Options Dialog"
+
+	]
+	ChatChoiceLabel2(string) : "Second Chat Choice Label" : "#jazz.store.store" : "Label for second chat choice. Can be a localization token."
+	ChatChoice2(choices) : "Second Chat Choice Action" : "STORE" : "Defines the function of the second chat choice. Can be a (short!) bit of Clientside Lua" = 
+	[
+		"UPGRADES" : "Upgrades Menu"
+		"STORE" : "Shop Menu"
+		"CHAT" : "Let's Chat!"
+		"HUB" : "(If needed) Hub Options Dialog"
+
+	]
+	ChatChoiceLabel3(string) : "Third Chat Choice Label" : "#jazz.store.chat" : "Label for third chat choice. Can be a localization token."
+	ChatChoice3(choices) : "Thrid Chat Choice Action" : "CHAT" : "Defines the function of the third chat choice. Can be a (short!) bit of Clientside Lua" = 
+	[
+		"UPGRADES" : "Upgrades Menu"
+		"STORE" : "Shop Menu"
+		"CHAT" : "Let's Chat!"
+		"HUB" : "(If needed) Hub Options Dialog"
+
+	]
+	ChatChoiceLabel4(string) : "Fourth Chat Choice Label" : "#jazz.store.hub" : "Label for fourth chat choice. Can be a localization token."
+	ChatChoice4(choices) : "Fourth Chat Choice Action" : "HUB" : "Defines the function of the fourth chat choice. Can be a (short!) bit of Clientside Lua" = 
+	[
+		"UPGRADES" : "Upgrades Menu"
+		"STORE" : "Shop Menu"
+		"CHAT" : "Let's Chat!"
+		"HUB" : "(If needed) Hub Options Dialog"
+
+	]
+]
+
 @PointClass base(Targetname, Angles) studioprop("models/props_combine/combine_interface001.mdl") = jazz_bus_selector : "Custom Workshop ID Loader" []
 
 @PointClass base(Targetname, Angles) iconsprite("editor/jazz_hub_propleaderboard.vmt") = jazz_hub_propleaderboard : "Prop Leaderboard"

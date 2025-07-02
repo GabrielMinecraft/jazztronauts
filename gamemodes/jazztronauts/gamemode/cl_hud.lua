@@ -86,6 +86,8 @@ local function FadeInNotes()
 	return math.Clamp(CurAlpha + (FrameTime() * FadeSpeed ), 0, 255 )
 end
 
+local red, green = Color(255,0,0,255), Color(0,255,0,255)
+
 local function DrawNoteCount()
 	local amt = LocalPlayer() and LocalPlayer():GetNotes() or 0
 
@@ -152,10 +154,10 @@ local function DrawNoteCount()
 
 	//Draw the new money text
 	local text = ""
-	local color = Color( 255, 0, 0 )
+	local color = red
 	if amt - VisualAmount > 0 then
 		text = "+"
-		color = Color( 0, 255, 0 )
+		color = green
 	end
 	text = text .. tostring( math.floor( amt - VisualAmount ) )
 

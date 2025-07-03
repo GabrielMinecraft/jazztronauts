@@ -27,16 +27,19 @@ function ENT:addHubChat( label )
 	
 	if self:GetHubInfo() ~= selector:GetHubInfo() then
 		self.chatmenu.AddChoice(self.ChatChoices, label, function(self, ply)
-			local script = "hub.begin"
-			if SERVER then
-				dialog.Dispatch(script, ply, self)
-			else
-				net.Start("JazzPlayScript")
-					net.WriteEntity(self)
-					net.WriteString(script)
-				net.SendToServer()
-			end
+			self:runScript("hub.begin", ply)
 		end)
+	end
+end
+
+function ENT:runScript( script, ply )
+	if SERVER then
+		dialog.Dispatch(script, ply, self)
+	else
+		net.Start("JazzPlayScript")
+			net.WriteEntity(self)
+			net.WriteString(script)
+		net.SendToServer()
 	end
 end
 

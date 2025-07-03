@@ -70,13 +70,18 @@ function ENT:SetCatMenu()
 			["STORE"] = function(cat,v) cat.chatmenu.AddChoice(cat.ChatChoices, v.Lb, function(cat, ply) ClientRun(ply, "jstore.OpenStore()") end) end,
 			["CHAT"] = function(cat,v) cat.chatmenu.AddChoice(cat.ChatChoices, v.Lb, function(cat, ply) cat:StartChat(ply) end) end,
 			["HUB"] = function(cat,v) timer.Simple(1, function() cat:addHubChat(v.Lb) end) end,
-			--todo: need an option to play specific scenes
 			--todo: need an option for map I/O
 		}
 
 		for _, v in ipairs(listed) do
+
+			--start entry with ^ to denote a scene to play
+			local _, _, scene = string.find( v.Co, "^^(.+)" )
+			
 			if entries[v.Co] then
 				entries[v.Co](cat,v)
+			elseif scene then
+				cat.chatmenu.AddChoice(cat.ChatChoices, v.Lb, function(cat, ply) cat:runScript( scene, ply ) end)
 			else
 				cat.chatmenu.AddChoice(cat.ChatChoices, v.Lb, function(cat, ply) ClientRun(ply, v.Co) end)
 			end

@@ -184,9 +184,9 @@
         3 : "Pianist" 
 		4 : "Cellist"
     ]
-	WelcomeText(string) : "Welcome Text" : "#jazz.store.welcome" : "Top label for text box. Can be a localization token."
-	ChatChoiceLabel1(string) : "First Chat Choice Label" : "#jazz.store.upgrade" : "Label for first chat choice. Can be a localization token."
-	ChatChoice1(choices) : "First Chat Choice Action" : "UPGRADES" : "Defines the function of the first chat choice. Can be a (short!) bit of Clientside Lua" = 
+	WelcomeText(string) : "Welcome Text" : : "Top label for text box. Can be a localization token." //"#jazz.store.welcome"
+	ChatChoiceLabel1(string) : "First Chat Choice Label" : : "Label for first chat choice. Can be a localization token." //"#jazz.store.upgrade"
+	ChatChoice1(choices) : "First Chat Choice Action" : : "Defines the function of the first chat choice. Can be a (short!) bit of Clientside Lua, or a Jazztronauts scene. If using a scene, place a caret (^) before the script name, and include the starting position in the script. For example: '^jazz_bar_intro.begin'" = //"UPGRADES"
 	[
 		"UPGRADES" : "Upgrades Menu"
 		"STORE" : "Shop Menu"
@@ -194,8 +194,8 @@
 		"HUB" : "(If needed) Hub Options Dialog"
 
 	]
-	ChatChoiceLabel2(string) : "Second Chat Choice Label" : "#jazz.store.store" : "Label for second chat choice. Can be a localization token."
-	ChatChoice2(choices) : "Second Chat Choice Action" : "STORE" : "Defines the function of the second chat choice. Can be a (short!) bit of Clientside Lua" = 
+	ChatChoiceLabel2(string) : "Second Chat Choice Label" : : "Label for second chat choice. Can be a localization token." //"#jazz.store.store"
+	ChatChoice2(choices) : "Second Chat Choice Action" : : "Defines the function of the first chat choice. Can be a (short!) bit of Clientside Lua, or a Jazztronauts scene. If using a scene, place a caret (^) before the script name, and include the starting position in the script. For example: '^jazz_bar_intro.begin'" = //"STORE"
 	[
 		"UPGRADES" : "Upgrades Menu"
 		"STORE" : "Shop Menu"
@@ -203,8 +203,8 @@
 		"HUB" : "(If needed) Hub Options Dialog"
 
 	]
-	ChatChoiceLabel3(string) : "Third Chat Choice Label" : "#jazz.store.chat" : "Label for third chat choice. Can be a localization token."
-	ChatChoice3(choices) : "Thrid Chat Choice Action" : "CHAT" : "Defines the function of the third chat choice. Can be a (short!) bit of Clientside Lua" = 
+	ChatChoiceLabel3(string) : "Third Chat Choice Label" : : "Label for third chat choice. Can be a localization token." //"#jazz.store.chat"
+	ChatChoice3(choices) : "Thrid Chat Choice Action" : : "Defines the function of the first chat choice. Can be a (short!) bit of Clientside Lua, or a Jazztronauts scene. If using a scene, place a caret (^) before the script name, and include the starting position in the script. For example: '^jazz_bar_intro.begin'" = //"CHAT"
 	[
 		"UPGRADES" : "Upgrades Menu"
 		"STORE" : "Shop Menu"
@@ -212,8 +212,8 @@
 		"HUB" : "(If needed) Hub Options Dialog"
 
 	]
-	ChatChoiceLabel4(string) : "Fourth Chat Choice Label" : "#jazz.store.hub" : "Label for fourth chat choice. Can be a localization token."
-	ChatChoice4(choices) : "Fourth Chat Choice Action" : "HUB" : "Defines the function of the fourth chat choice. Can be a (short!) bit of Clientside Lua" = 
+	ChatChoiceLabel4(string) : "Fourth Chat Choice Label" : : "Label for fourth chat choice. Can be a localization token." //"#jazz.store.hub"
+	ChatChoice4(choices) : "Fourth Chat Choice Action" : : "Defines the function of the first chat choice. Can be a (short!) bit of Clientside Lua, or a Jazztronauts scene. If using a scene, place a caret (^) before the script name, and include the starting position in the script. For example: '^jazz_bar_intro.begin'" = //"HUB"
 	[
 		"UPGRADES" : "Upgrades Menu"
 		"STORE" : "Shop Menu"
@@ -482,3 +482,4 @@
 @PointClass base(Weapon) studioprop("models/Gibs/HGIBS.mdl") = weapon_stan : "Stan" []
 @PointClass base(Weapon) studioprop("models/weapons/w_hackergoggles.mdl") = weapon_hacker : "Hacker Goggles" []
 @PointClass base(Weapon) studioprop("models/weapons/w_pistol.mdl") = weapon_rats : "Personal Shrink Ray" []
+@PointClass base(Weapon) studioprop("models/weapons/w_shotgun.mdl") = weapon_netgun : "Capsule Capture Gun" []

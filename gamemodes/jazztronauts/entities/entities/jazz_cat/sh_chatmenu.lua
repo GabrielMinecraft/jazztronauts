@@ -287,14 +287,14 @@ function ENT:DrawDialogEntry(choices, showperc)
 	local fadeperc = math.Clamp(showperc * 2 - 1, 0, 1)
 	cam.Start3D2D(pos + ang:Up()*0.1, ang, self.ScreenScale)
 		surface.SetAlphaMultiplier(fadeperc)
-		draw.DrawText(choices.WelcomeText, "JazzDialogAsk", 0, -130, Color(0,0,0), TEXT_ALIGN_CENTER)
+		if choices.WelcomeText then draw.DrawText(choices.WelcomeText, "JazzDialogAsk", 0, -130, Color(0,0,0), TEXT_ALIGN_CENTER) end
 
 		-- Draw the choice options + highlight nearby one
 		for i=1, #choices do
 			local drawCenter = #choices == 1
 			local ang = (i / #choices) * 360 - 90
 			if #choices > 3 then chatmenu.scaleH = 80 else chatmenu.scaleH = 60 end
-			if drawCenter then ang = -85 end
+			if drawCenter then ang = 270 end
 			self:DrawChoice(choices[i], 0, self.RadialOffset, i == hitoption, ang, drawCenter and 2.5, drawCenter and 0.5)
 		end
 

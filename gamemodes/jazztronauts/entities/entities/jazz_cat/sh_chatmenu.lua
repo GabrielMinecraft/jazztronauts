@@ -216,7 +216,7 @@ end
 ENT.SelectBG = chatmenu.RenderSelectBG("JazzDialogOption", 3, 5)
 ENT.SelectBGMat = ENT.SelectBG:GetUnlitMaterial(true,false,true,true)
 
-function ENT:DrawChoice(choice, centerX, centerY, highlighted, ang, scale, scaleBump)
+function ENT:DrawChoice(choice, centerX, centerY, highlighted, ang, scale, scaleBump, totalChoices)
 
 	ang = math.NormalizeAngle(ang)
 	scale = scale or 1
@@ -227,6 +227,11 @@ function ENT:DrawChoice(choice, centerX, centerY, highlighted, ang, scale, scale
 		rot = math.NormalizeAngle(rot + 90) * 1.3 + 90
 	else
 		rot = -90
+	end
+
+	--totally different angle scene with more than four choices 
+	if totalChoices > 4 then
+		rot = math.sin(math.pi * -ang / 90) * 15 - 90
 	end
 
 	local pX = math.cos(math.rad(ang)) * chatmenu.scaleW * scaleBump + centerX
@@ -296,7 +301,7 @@ function ENT:DrawDialogEntry(choices, showperc)
 			local ang = (i / #choices) * 360 - 90
 			if #choices > 3 then chatmenu.scaleH = 80 else chatmenu.scaleH = 60 end
 			if drawCenter then ang = 270 end
-			self:DrawChoice(choices[i], 0, self.RadialOffset, i == hitoption, ang, drawCenter and 2.5, drawCenter and 0.5)
+			self:DrawChoice(choices[i], 0, self.RadialOffset, i == hitoption, ang, drawCenter and 2.5, drawCenter and 0.5, #choices)
 		end
 
 		-- Draw the virtual mouse cursor for where we're currently pointing

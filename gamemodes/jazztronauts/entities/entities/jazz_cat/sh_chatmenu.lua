@@ -86,19 +86,20 @@ function ENT:GetSelectedOption(ply, choices)
 
 		-- Convert into local coordinates relative to the center of the options screen
 		local ratio = chatmenu.scaleW / chatmenu.scaleH
-		localPos = WorldToLocal(hitpos, Angle(), dialogCenter, ang)
+		localPos = WorldToLocal(hitpos, angle_zero, dialogCenter, ang)
 		local lpos = Vector(localPos.x, localPos.y * ratio, localPos.z)
 
 		-- Do a test to make sure we're within the screen
 		//surface.DrawTexturedRectRotated(0, 0, self.ScreenWidth, self.ScreenHeight, 180)
-		if not self:IsWithinScreen(lpos.x, lpos.y) then
+		if not self:IsWithinScreen(lpos.x, lpos.y * .625) then
 			return hitoption, localPos
 		end
 
 		-- Grab the angle, this is basically a hidden radial menu
-		local ang = -math.deg(math.atan2(lpos.y, lpos.x)) + 90
-		ang = math.NormalizeAngle(ang) + 180
-		hitoption = ((math.Round((#choices - 1) * ang / 360) + 1) % #choices) + 1
+		local ang = math.deg(math.atan2(lpos.y, lpos.x)) % 360
+		
+		hitoption = #choices - (math.Round((ang/360 - .25) * #choices) % #choices)
+
 	end
 
 	return hitoption, localPos

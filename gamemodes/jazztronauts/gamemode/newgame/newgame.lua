@@ -40,7 +40,13 @@ if SERVER then
 
 		-- Reset non-persistent sql stuff
 		jsql.ResetExcept(GetPersistent())
-		unlocks.ClearAll()
+		unlocks.ClearAll("scripts") --save scripts, except...
+		unlocks.Lock( "scripts", "jazz_bar_shardprogress.begin100" )
+		unlocks.Lock( "scripts", "normal_ending_epilogue.begin" )
+		unlocks.Lock( "scripts", "eclipse_cat_1.begin" )
+		unlocks.Lock( "scripts", "eclipse_cat_2.begin" )
+		unlocks.Lock( "scripts", "eclipse_cat_3.begin" )
+		unlocks.Lock( "scripts", "black_shard_endings.begin" )
 
 		-- Changelevel to intro again
 		mapcontrol.Launch(mapcontrol.GetIntroMap())

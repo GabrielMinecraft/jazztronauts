@@ -68,6 +68,8 @@ local AcceptEntClass = {
 	["prop_dynamic_override"] = 1,
 	["prop_ragdoll"] = 1,
 	["prop_door_rotating"] = 1,
+	["jazz_prop_sphere"] = 1,
+	["jazz_factscreen"] = 1,
 	--let's get esoteric wee
 	["gmod_tool"] = 1,
 	["gmod_camera"] = 1,

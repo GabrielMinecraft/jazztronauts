@@ -33,9 +33,10 @@ cvars.AddChangeCallback(includeLocalAddons:GetName(), UpdateMapsConvarChanged, "
 cvars.AddChangeCallback(includeLocalMaps:GetName(), UpdateMapsConvarChanged, "jazz_mapcontrol_cback")
 
 votesToLeave = 0 --if we're too close to the edict limit to summon the bus, count bus summoner useage as a vote to leave
+majority = 1 --votes needed to leave
 
 function voteToLeave(vote)
-	if ents.GetEdictCount() < 8064 then votesToLeave = 0 return end --we've dipped back below a dangerous edict level, no need for voting
+	if SERVER and ents.GetEdictCount() < 8064 then votesToLeave = 0 return end --we've dipped back below a dangerous edict level, no need for voting
 	local summoners = 0 --total number of bus summoners with player owners (not all players might have/be able to get summoners if we're near edict limit)
 	for _, ent in ents.Iterator() do
 		if IsValid(ent) then
@@ -45,12 +46,16 @@ function voteToLeave(vote)
 			end
 		end
 	end
-	local majority = math.ceil(summoners / 2)
+	majority = math.ceil(summoners / 2)
 	votesToLeave = vote and votesToLeave + 1 or math.max(0,votesToLeave - 1)
-	if votesToLeave >= majority and not IsLaunching() then --get us out of here
-		--TODO: make this a little less abrupt. Add HUD stuff explaining what's going on/showing a current vote to leave
+	if SERVER and votesToLeave >= majority and not IsLaunching() then --get us out of here
+		--TODO: make this a little less abrupt.
 		Launch(GetHubMap())
 	end
+end
+
+function GetVotesToLeave()
+	return votesToLeave, majority
 end
 
 local server_ugc = false
@@ -306,6 +311,17 @@ if SERVER then
 			table.insert(addons, num)
 		end
 
+		-- Built in cache that comes with the game
+		if #addons == 0 then
+			ErrorNoHalt("Bad addon list, using backup!") --in case Foohy's server eats the list we still want people able to tell us
+
+			for line in string.gmatch(file.Read(defaultAddonList, "GAME"), "[^\r\n]+") do
+				local num = tonumber(line)
+				if not num then continue end
+				table.insert(addons, num)
+			end
+		end
+
 		return addons
 	end
 
@@ -360,18 +376,15 @@ if SERVER then
 			local addonsStr = task.Await(addonTask)
 
 			if addonsStr and string.len(string.Trim(addonsStr)) > 0 then
+				--todo: should do something to help prevent this from saving garbage from a bad host
 				-- Save this successful run
 				file.CreateDir(string.GetPathFromFilename(overrideAddonCache))
 				file.Write(overrideAddonCache, addonsStr)
 			else
-				Msg("Failed to fetch latest addons.txt list")
-				if string.len(string.Trim(addonsStr)) == 0 then Msg(", list empty!") end
-				Msg("\n")
+				if addonsStr and string.len(string.Trim(addonsStr)) == 0 then ErrorNoHalt("Failed to fetch latest addons.txt list, list empty!")
+				else ErrorNoHalt("Failed to fetch latest addons.txt list") end
 				-- Try loading from their last successful download cache
 				addonsStr = file.Read(overrideAddonCache, "DATA")
-
-				-- Built in cache that comes with the game
-				addonsStr = (addonsStr and string.len(string.Trim(addonsStr)) > 0) and addonsStr or file.Read(defaultAddonList, "GAME")
 			end
 
 			insertAddons(GetExternalMapAddons(addonsStr or ""))

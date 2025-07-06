@@ -86,19 +86,20 @@ function ENT:GetSelectedOption(ply, choices)
 
 		-- Convert into local coordinates relative to the center of the options screen
 		local ratio = chatmenu.scaleW / chatmenu.scaleH
-		localPos = WorldToLocal(hitpos, Angle(), dialogCenter, ang)
+		localPos = WorldToLocal(hitpos, angle_zero, dialogCenter, ang)
 		local lpos = Vector(localPos.x, localPos.y * ratio, localPos.z)
 
 		-- Do a test to make sure we're within the screen
 		//surface.DrawTexturedRectRotated(0, 0, self.ScreenWidth, self.ScreenHeight, 180)
-		if not self:IsWithinScreen(lpos.x, lpos.y) then
+		if not self:IsWithinScreen(lpos.x, lpos.y * .625) then
 			return hitoption, localPos
 		end
 
 		-- Grab the angle, this is basically a hidden radial menu
-		local ang = -math.deg(math.atan2(lpos.y, lpos.x)) + 90
-		ang = math.NormalizeAngle(ang) + 180
-		hitoption = ((math.Round((#choices - 1) * ang / 360) + 1) % #choices) + 1
+		local ang = math.deg(math.atan2(lpos.y, lpos.x)) % 360
+		
+		hitoption = #choices - (math.Round((ang/360 - .25) * #choices) % #choices)
+
 	end
 
 	return hitoption, localPos
@@ -215,7 +216,7 @@ end
 ENT.SelectBG = chatmenu.RenderSelectBG("JazzDialogOption", 3, 5)
 ENT.SelectBGMat = ENT.SelectBG:GetUnlitMaterial(true,false,true,true)
 
-function ENT:DrawChoice(choice, centerX, centerY, highlighted, ang, scale, scaleBump)
+function ENT:DrawChoice(choice, centerX, centerY, highlighted, ang, scale, scaleBump, totalChoices)
 
 	ang = math.NormalizeAngle(ang)
 	scale = scale or 1
@@ -226,6 +227,11 @@ function ENT:DrawChoice(choice, centerX, centerY, highlighted, ang, scale, scale
 		rot = math.NormalizeAngle(rot + 90) * 1.3 + 90
 	else
 		rot = -90
+	end
+
+	--totally different angle scene with more than four choices 
+	if totalChoices > 4 then
+		rot = math.sin(math.pi * -ang / 90) * 15 - 90
 	end
 
 	local pX = math.cos(math.rad(ang)) * chatmenu.scaleW * scaleBump + centerX
@@ -287,15 +293,15 @@ function ENT:DrawDialogEntry(choices, showperc)
 	local fadeperc = math.Clamp(showperc * 2 - 1, 0, 1)
 	cam.Start3D2D(pos + ang:Up()*0.1, ang, self.ScreenScale)
 		surface.SetAlphaMultiplier(fadeperc)
-		draw.DrawText(choices.WelcomeText, "JazzDialogAsk", 0, -130, Color(0,0,0), TEXT_ALIGN_CENTER)
+		if choices.WelcomeText then draw.DrawText(choices.WelcomeText, "JazzDialogAsk", 0, -130, Color(0,0,0), TEXT_ALIGN_CENTER) end
 
 		-- Draw the choice options + highlight nearby one
 		for i=1, #choices do
 			local drawCenter = #choices == 1
 			local ang = (i / #choices) * 360 - 90
 			if #choices > 3 then chatmenu.scaleH = 80 else chatmenu.scaleH = 60 end
-			if drawCenter then ang = -85 end
-			self:DrawChoice(choices[i], 0, self.RadialOffset, i == hitoption, ang, drawCenter and 2.5, drawCenter and 0.5)
+			if drawCenter then ang = 270 end
+			self:DrawChoice(choices[i], 0, self.RadialOffset, i == hitoption, ang, drawCenter and 2.5, drawCenter and 0.5, #choices)
 		end
 
 		-- Draw the virtual mouse cursor for where we're currently pointing

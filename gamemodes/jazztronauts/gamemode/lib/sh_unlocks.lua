@@ -1,5 +1,6 @@
 if SERVER then
 	util.AddNetworkString( "unlock_msg" )
+	util.AddNetworkString( "lock_msg" )
 	AddCSLuaFile("sh_unlocks.lua")
 end
 
@@ -23,8 +24,16 @@ function Clear( list_name )
 
 end
 
-function ClearAll()
-	for k, v in pairs(unlock_lists) do
+function ClearAll(exceptions)
+	for k, _ in pairs(unlock_lists) do
+		if k == exceptions then continue end
+		if type(exceptions) == "table" then
+			local cont = false
+			for _, v in ipairs(exceptions) do
+				if k == v then cont = true break end
+			end
+			if cont then continue end
+		end
 		Clear(k)
 	end
 end
@@ -157,6 +166,47 @@ function Unlock( list_name, ply, key )
 
 end
 
+function Lock( list_name, ply, key )
+	local ply, key = ply, key
+	if key == nil then key = ply ply = nil end
+
+	if not unlock_lists[list_name] then return false end
+	if not IsUnlocked( list_name, ply, key ) then return false end
+
+	if CLIENT then
+
+		--print("LOCKED: " .. "[" .. list_name .. "] " .. key)
+
+		local list = unlock_lists[list_name]
+		list["keys"][key] = nil
+		table.RemoveByValue( list["values"], key )
+
+		return true
+
+	end
+
+	local steam_id = ply and ply:SteamID64() or 0
+	local result = ply and sql.Query( ("DELETE FROM %s WHERE steamid = '%s' AND strkey= '%s'"):format(
+		unlock_lists[list_name],
+		steam_id,
+		key ) ) or sql.Query( ("DELETE FROM %s WHERE strkey= '%s'"):format(
+		unlock_lists[list_name],
+		key ) )
+
+	if false == result then
+		print("ERROR: " .. tostring( sql.LastError() ) )
+		return false
+	end
+
+	net.Start( "lock_msg" )
+	net.WriteString( list_name )
+	net.WriteString( key )
+	if ply then net.Send( ply ) else net.Broadcast() end
+
+	return true
+
+end
+
 function GetAll( list_name, ply )
 
 	if CLIENT then
@@ -196,6 +246,17 @@ if CLIENT then
 		end
 
 		Unlock( list_name, LocalPlayer(), key )
+
+	end )
+
+	net.Receive( "lock_msg", function()
+
+		local list_name = net.ReadString()
+		local key = net.ReadString()
+
+		unlock_lists[list_name] = nil
+		
+		Lock( list_name, LocalPlayer(), key )
 
 	end )
 

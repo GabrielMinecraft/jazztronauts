@@ -2,7 +2,7 @@
 {
 	"$basetexture" "models/sunabouzu/toycapsule_a"
 	"$bumpmap" "models/sunabouzu/flat_normal"
-	"$lightwarptexture" "materials/sunabouzu/lightwarp"
+	"$lightwarptexture" "sunabouzu/lightwarp"
 	"$surfaceprop" "plastic"
 	//"$additive" 1
 	$translucent 1

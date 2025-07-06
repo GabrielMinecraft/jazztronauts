@@ -68,6 +68,8 @@ local AcceptEntClass = {
 	["prop_dynamic_override"] = 1,
 	["prop_ragdoll"] = 1,
 	["prop_door_rotating"] = 1,
+	["jazz_prop_sphere"] = 1,
+	["jazz_factscreen"] = 1,
 	--let's get esoteric wee
 	["gmod_tool"] = 1,
 	["gmod_camera"] = 1,
@@ -144,9 +146,13 @@ local IgnoreEntClass = {
 	["weapon_propsnatcher"] = true
 }
 
+function GetMaxSnatchLevel()
+	return AcceptEntClass.maxLevel
+end 
+
 function CanSnatch(ent, level)
 	local level = level or 1
-	if level == true then level = AcceptEntClass["maxLevel"] end
+	if level == true then level = GetMaxSnatchLevel() end
 
 	--Accept only this kinda stuff
 	if not IsValid(ent) or not ent:IsValid() then return false end
@@ -220,7 +226,7 @@ if SERVER then
 	end
 
 	function CollectProp(ply, ent)
-		if !CanSnatch(ent, AcceptEntClass.maxLevel) then return nil end
+		if !CanSnatch(ent, GetMaxSnatchLevel()) then return nil end
 
 		local worth = ent.JazzWorth or 1
 		return worth
@@ -639,7 +645,7 @@ if SERVER then
 		local function getKey(ent) return ent:GetClass() .. "_" .. (ent:GetModel() or "") end
 
 		for _, v in pairs(props) do
-			if not CanSnatch(v, AcceptEntClass.maxLevel) then continue end
+			if not CanSnatch(v, GetMaxSnatchLevel()) then continue end
 
 			local k = getKey(v)
 			counts[k] = counts[k] or 0

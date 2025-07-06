@@ -153,9 +153,10 @@ end
 function GM:JazzMapStarted()
 	print("MAP STARTED!!!!!!!")
 	local isIntro = game.GetMap() == mapcontrol.GetIntroMap()
-	if not mapcontrol.IsInGamemodeMap() or isIntro then
+	local isOutro = game.GetMap() == mapcontrol.GetEndMaps()[1]
+	if not mapcontrol.IsInGamemodeMap() or isIntro or isOutro then
 		game.CleanUpMap()
-		self:GenerateJazzEntities(isIntro)
+		self:GenerateJazzEntities(isIntro or isOutro)
 	end
 
 	-- Unlock and respawn everyone

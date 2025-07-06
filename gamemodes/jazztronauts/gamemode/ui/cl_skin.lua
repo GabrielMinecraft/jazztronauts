@@ -2,8 +2,6 @@
 local surface = surface
 local Color = Color
 
-print("SKIN")
-
 SKIN = {}
 
 SKIN.PrintName		= "Jazz Skin"

@@ -16,9 +16,9 @@ function ENT:Initialize()
 	if SERVER then
 		self:EnableCustomCollisions(true)
 		self:PhysicsInitSphere(outerRadius, "glass")
-		self:GetPhysicsObject():SetMass(50)
+		self:GetPhysicsObject():SetMass(outerRadius)
 
-		if not self:GetModel() then
+		if not self:GetModel() then --== "models/error.mdl" then
 			self:SetModel(testModel)
 		end
 
@@ -47,11 +47,14 @@ function ENT:OnTakeDamage(dmginfo)
 end
 
 function ENT:SetupDataTables()
-	self:NetworkVar("Int", 0, "Radius")
+	self:NetworkVar("Int", "Radius")
+	self:NetworkVar("Bool", "NetGun")
 end
 
 function ENT:OnRemove()
-
+	if self:GetNetGun() then
+		self:EmitSound( "garrysmod/balloon_pop_cute.wav", 75, math.random( 120, 135 ), 1, CHAN_ITEM, SND_NOFLAGS )
+	end
 end
 
 if SERVER then return end
@@ -94,7 +97,7 @@ function ENT:GetRandomColor()
 end
 
 function ENT:UpdateMeshes()
-	if self.SphereModel:GetParent() != self then
+	if IsValid(self.SphereModel) and self.SphereModel:GetParent() != self then
 		local min, max = self:GetModelBounds()
 		local center = (max + min) / 2
 		local radius = getInnerRadius(self.SphereModel)
@@ -118,10 +121,6 @@ function ENT:UpdateMeshes()
 	end
 end
 
-function ENT:Think()
-
-end
-
 function ENT:OnRemove()
 	if IsValid(self.SphereModel) then
 		self.SphereModel:Remove()
@@ -130,9 +129,8 @@ end
 
 function ENT:Draw()
 	self:UpdateMeshes()
-	self.SphereModel:DrawModel()
+	if IsValid(self.SphereModel) then self.SphereModel:DrawModel() end
 	render.SuppressEngineLighting(true)
 	self:DrawModel()
 	render.SuppressEngineLighting(false)
-
 end
